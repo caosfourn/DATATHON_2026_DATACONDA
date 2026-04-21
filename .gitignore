@@ -18,8 +18,6 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# ─── Data Marts (Parquet output — rebuild bằng pipeline) ─
-joined/marts/*.parquet
 
 # ─── IDE ─────────────────────────────────────────────────
 .vscode/
