@@ -12,8 +12,9 @@ Data Marts:
 
 Usage:
   cd joined/
-  python data_pipeline.py            # Build tất cả Data Marts
-  python data_pipeline.py --mart 1   # Build riêng Data Mart 1
+  python data_pipeline.py                # Build từ dataset/ gốc
+  python data_pipeline.py --cleaned      # Build từ dataset_cleaned/
+  python data_pipeline.py --mart 1       # Build riêng Data Mart 1
 """
 
 import duckdb
@@ -553,10 +554,17 @@ def load_daily_summary():
 # CLI Entry Point
 # ═══════════════════════════════════════════════════════════════════════════
 def main():
+    global RAW_DIR
     parser = argparse.ArgumentParser(description="DATATHON 2026 — Data Pipeline")
     parser.add_argument("--mart", type=int, default=0,
                         help="Build specific mart (1-4). 0 = build all.")
+    parser.add_argument("--cleaned", action="store_true",
+                        help="Read from dataset_cleaned/ instead of dataset/")
     args = parser.parse_args()
+
+    if args.cleaned:
+        RAW_DIR = os.path.join(SCRIPT_DIR, "..", "dataset_cleaned")
+        print("📂 Source: dataset_cleaned/ (quality-fixed data)")
 
     # Create output directory
     os.makedirs(OUT_DIR, exist_ok=True)
