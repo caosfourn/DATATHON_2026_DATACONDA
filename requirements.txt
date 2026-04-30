@@ -1,0 +1,11 @@
+pandas
+numpy
+duckdb
+jupyter
+matplotlib
+seaborn
+scikit-learn
+xgboost
+lightgbm
+statsmodels
+shap
