@@ -1,0 +1,36 @@
+1. Khủng hoảng Huỷ đơn & Hoàn tiền (Bảng Orders vs Payments vs Returns)
+Đây là một "báo động đỏ" về quy trình tài chính và chăm sóc khách hàng:
+Dữ liệu: Có tổng cộng 59,462 đơn hàng có trạng thái là Hủy (Cancelled) trong bảng orders.csv và 100% số đơn này đều đã được thanh toán (tồn tại trong bảng payments.csv).
+Sự bất thường: Tuyệt nhiên KHÔNG có bất kỳ bản ghi hoàn tiền (Refund) nào cho 59,462 đơn hàng này trong bảng returns.csv.
+Vấn đề doanh nghiệp: Hệ thống đang cho thấy khách hàng đã trả tiền, đơn bị hủy, nhưng tiền không được hoàn lại (hoặc quá trình hoàn tiền đang được thực hiện hoàn toàn ngoài hệ thống và không được tracking). Điều này tiềm ẩn rủi ro cực lớn về kiện tụng và uy tín thương hiệu.
+Lỗi đồng bộ trạng thái: Ngoài ra, có 80 đơn hàng được hệ thống đánh dấu là đã trả hàng (returned) nhưng lại "bốc hơi" hoàn toàn, không có mặt trong danh sách returns.csv.
+
+2. "Đơn hàng Ma" trong Khâu Vận chuyển (Bảng Orders vs Shipments)
+Dữ liệu: Có 535 đơn hàng được ghi nhận trạng thái là đã giao (delivered) hoặc đang giao (shipped) trong bảng orders.csv.
+Sự bất thường: 535 đơn hàng này hoàn toàn không tồn tại trong bảng shipments.csv (không có ngày giao, không có mã vận đơn, không có phí ship).
+Vấn đề doanh nghiệp: Đây là lỗ hổng theo dõi vận đơn. Có thể nhân viên kho tự tay "bấm hoàn thành" đơn hàng trên hệ thống mà không qua đối tác giao hàng thực tế (gian lận/Fake delivery), hoặc hệ thống API giữa đối tác vận chuyển và công ty đang bị rớt dữ liệu (Data leakage).
+
+3. Vấn đề bán Lỗ (Bảng Features_daily_train & Returns)
+Dữ liệu: Cột lợi nhuận (profit) và chênh lệch doanh thu xuất hiện hàng loạt giá trị âm. Cụ thể có 333 ngày được ghi nhận profit âm (bán lỗ).
+Vấn đề doanh nghiệp: Mặc dù chênh lệch doanh thu âm (bán hôm nay ít hơn hôm qua) là bình thường, nhưng profit âm trên diện rộng là bất thường. Kết hợp với việc lượng hàng hoàn về có trung vị (return_quantity) là 2 sản phẩm và mức tiền hoàn lại (refund_amount) lên tới hàng trăm triệu/trường hợp, có vẻ như các chính sách Khuyến mãi (Promotions) hoặc phí vận hành (Return fees) đang "ăn lẹm" toàn bộ lợi nhuận của doanh nghiệp.
+
+4. Tê liệt Chuỗi cung ứng (Bảng Inventory - Tóm tắt lại)
+Như chúng ta đã bóc tách từ trước, chuỗi cung ứng đang bị "Bullwhip Effect" tàn phá:
+Hệ thống cảnh báo hỏng: Lá cờ tái đặt hàng (reorder_flag) tê liệt 100%.
+Kịch bản sai thời điểm (Poor Timing): 50.6% các trường hợp (hơn 30,000 bản ghi) vừa bị đứt hàng (stockout_flag = 1) lại vừa bị quá tải tồn kho (overstock_flag = 1) trong cùng một tháng. Nhập hàng quá muộn rồi lại nhập một lúc quá nhiều khiến tồn kho trung bình nằm ở kho lên tới 375 ngày (Hơn 1 năm đọng vốn).
+
+1. Nghịch lý Xuyên không (Bảng Customers vs Orders)
+Phát hiện: Có tới 477,453 đơn hàng (chiếm gần 74% tổng số đơn) có Ngày đặt hàng (order_date) diễn ra TRƯỚC CẢ NGÀY KHÁCH HÀNG TẠO TÀI KHOẢN (signup_date).
+Ý nghĩa: Đây là một lỗi kiến trúc dữ liệu (Data Architecture) cực kỳ nặng. Có thể hệ thống cho phép khách mua vãng lai (Guest Checkout) rồi sau đó mới gán tài khoản hồi tố, hoặc quá trình chuyển đổi (migrate) hệ thống CRM cũ sang mới đã làm sai lệch toàn bộ mốc thời gian signup_date. Nếu dùng cột signup_date này để chạy các mô hình Customer Lifetime Value (CLV) thì kết quả sẽ sai bét.
+2. Rủi ro Kiện cáo & Chiếm dụng vốn (Bảng Orders vs Payments vs Returns)
+Phát hiện 1: Toàn bộ 59,462 đơn hàng bị Hủy (Cancelled) đều ghi nhận đã thu tiền khách hàng (có trong payments.csv), nhưng tuyệt nhiên KHÔNG CÓ BẢN GHI HOÀN TIỀN nào trong bảng returns.csv. Doanh nghiệp đang thu tiền của khách nhưng đơn hủy lại không hoàn tiền (hoặc hoàn tiền ngoài hệ thống).
+Phát hiện 2: Có 80 đơn hàng được hệ thống cập nhật trạng thái là returned (Đã trả hàng) nhưng lại "bốc hơi" hoàn toàn khỏi danh sách chi tiết hoàn trả returns.csv. Không có dữ liệu về món hàng nào được trả, lý do trả hay tiền hoàn.
+3. Vận đơn "Ma" (Bảng Orders vs Shipments)
+Phát hiện: Có 535 đơn hàng được đánh dấu là đang giao (shipped) hoặc đã giao hoàn tất (delivered) trong bảng Orders, nhưng lại không hề có bất kỳ dữ liệu vận chuyển nào (ngày gửi, ngày nhận, phí ship) trong bảng shipments.csv.
+Ý nghĩa: Có thể nhân viên kho đã tự ý "bấm hoàn thành" đơn hàng trên hệ thống để chạy KPI mà không thực sự bàn giao cho đơn vị vận chuyển (gian lận), hoặc API kết nối với đối tác vận chuyển bị rớt dữ liệu (Data leakage).
+4. Dữ liệu rác trong Giỏ hàng (Bảng Order_items)
+Phát hiện: Có 32 trường hợp trong cùng một đơn hàng (order_id) và mua cùng một mã sản phẩm (product_id), hệ thống lại tách ra thành nhiều dòng (records) khác nhau thay vì gộp chung và cộng dồn số lượng (quantity).
+Ý nghĩa: Dù con số nhỏ, nhưng nó chứng tỏ hàm logic giỏ hàng (Cart aggregation) trên website đang bị lỗi. Nếu đưa dữ liệu này vào chạy mô hình Gợi ý Sản phẩm (Market Basket Analysis), nó sẽ tạo ra nhiễu.
+5. Lợi nhuận Âm trên diện rộng (Bảng Features_Daily_Train)
+Phát hiện: Cột Lợi nhuận (profit) theo ngày xuất hiện 333 ngày có giá trị Âm.
+Ý nghĩa: Trong khi doanh thu có thể biến động, việc profit bị âm tới gần 1 năm (333 ngày) cho thấy các chi phí ẩn (như discount_amount, shipping_fee do công ty chịu, hoặc tiền đền bù refund_amount) đang "ăn lẹm" quá sâu vào biên lợi nhuận của doanh nghiệp.

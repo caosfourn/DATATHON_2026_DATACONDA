@@ -1,0 +1,24 @@
+# === Bảng tổng hợp: Revenue, Profit, Return Rate theo Segment ===
+q1_summary = rfm_stats[['Segment', 'Customer_Count', 'Total_Revenue']].copy()
+q1_summary = pd.merge(q1_summary, segment_profit_stats[['Segment', 'order_profit', 'Margin']], on='Segment')
+
+returns_by_segment = df_profit_segment.groupby('Segment').size().reset_index(name='Total_Orders')
+returns_data = pd.merge(df_returns, df_orders[['order_id', 'customer_id']], on='order_id')
+returns_data = pd.merge(returns_data, rfm[['Segment']], left_on='customer_id', right_index=True)
+returns_count_seg = returns_data.groupby('Segment').size().reset_index(name='Return_Count')
+
+q1_summary = pd.merge(q1_summary, returns_by_segment, on='Segment')
+q1_summary = pd.merge(q1_summary, returns_count_seg, on='Segment', how='left').fillna(0)
+q1_summary['Return_Rate'] = q1_summary['Return_Count'] / q1_summary['Total_Orders']
+
+print('BẢNG TỔNG HỢP: Doanh thu, Lợi nhuận & Rủi ro trả hàng theo Segment')
+display(q1_summary.sort_values('Total_Revenue', ascending=False).style.format({
+    'Total_Revenue': '{:,.0f}', 'order_profit': '{:,.0f}',
+    'Margin': '{:.2%}', 'Return_Rate': '{:.2%}'
+}))
+
+fig_q1 = px.scatter(q1_summary, x='Total_Revenue', y='order_profit', size='Customer_Count',
+                    color='Segment', hover_name='Segment', text='Segment',
+                    title='Ma trận Doanh thu vs. Lợi nhuận (Kích thước = Số khách hàng)')
+fig_q1.update_traces(textposition='top center')
+fig_q1.show()

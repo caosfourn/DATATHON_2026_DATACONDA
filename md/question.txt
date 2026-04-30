@@ -1,0 +1,56 @@
+Bài toán 1: Đánh giá Tác động Kép của Độ trễ Giao hàng (Delivery Latency) đến Trải nghiệm Khách hàng và Tỷ lệ Rời bỏ (Customer Churn)
+Ngành thương mại điện tử tại Việt Nam (đặc biệt là mảng thời trang) phụ thuộc rất nhiều vào logistics. Khách hàng dễ dàng hủy đơn hoặc mất niềm tin nếu giao hàng quá chậm.
+
+Ý nghĩa cốt lõi (Meaningful):
+Giúp doanh nghiệp đo lường chính xác "cái giá" của việc giao hàng chậm (bằng con số tài chính như số đơn hoàn, số khách hàng mất đi).
+Cung cấp cơ sở để làm việc lại với các đối tác vận chuyển (3PL) hoặc quyết định mở thêm kho hàng trung chuyển (Micro-fulfillment center) tại các tỉnh thành xa.
+Điểm thách thức (Challenging):
+Đòi hỏi gom (join) nhiều bảng vật lý: orders, shipments (tính thời gian giao), reviews (đánh giá sao/comment), returns (khoản hoàn do giao chậm) và customers.
+Kết hợp phân tích chuỗi thời gian (time-series) để theo dõi hành vi mua lại của khách hàng (Cohort Analysis) sau khi họ trải nghiệm giao hàng trễ.
+Các bước thực hiện:
+Data Prep: Join orders với shipments để tính Lead_Time (Thời gian từ khi đặt đến khi nhận) và Delay_Days (Độ trễ so với SLA cam kết).
+Analysis: Phân khúc độ trễ này theo từng vùng địa lý (geography). So sánh với bảng reviews để xem có mối tương quan nghịch giữa Delay_Days và Review_Rating (số sao) hay không.
+Advanced Analysis (Churn/Cohort): Lọc ra nhóm khách hàng có đơn hàng bị trễ > 3 ngày trong lần mua đầu tiên, so sánh tỷ lệ quay lại mua hàng (Retention rate) trong 90 ngày tiếp theo với nhóm nhận hàng đúng hạn.
+Interpretation: Báo cáo thiệt hại ước tính từ việc khách hàng rời bỏ do logistics, và đề xuất các tỉnh/thành phố cần tối ưu hóa kho bãi.
+
+
+Bài toán 2: Phân tích Tác động ăn mòn lợi nhuận của Khuyến mãi (Promotion Cannibalization) và Tỷ lệ chuyển đổi của Web (Conversion Rate)
+Thương mại điện tử Việt Nam rất chuộng các chiến dịch Double Day (11.11, 12.12) hay Flash Sale. Tuy nhiên, nhiều doanh nghiệp chỉ nhìn vào doanh thu "ảo" dâng cao mà không nhận ra nó đang "ăn lấn" (cannibalize) doanh thu của những ngày bình thường và bào mòn biên lợi nhuận.
+
+Ý nghĩa cốt lõi (Meaningful):
+Tránh tình trạng "càng bán càng lỗ" do lạm dụng khuyến mãi giảm giá sâu. Tối ưu hóa được ngân sách Marketing và thiết kế chiến dịch thông minh hơn.
+Điểm thách thức (Challenging):
+Phân tích không chỉ đo lường sự tăng trưởng trong khoảng thời gian có promotions mà còn phải đánh giá sự sụt giảm ở giai đoạn trước (chờ sale) và sau sale (đã mua tích trữ).
+Yêu cầu kết nối dữ liệu hành vi trên web (web_traffic) với dữ liệu giao dịch thực tế (orders, promotions, order_items).
+Các bước thực hiện:
+Data Prep: Join orders, order_items với promotions và web_traffic qua biến thời gian (date/hour).
+Baseline Modeling: Xây dựng một đường "baseline sales" (mức doanh thu kỳ vọng nếu không chạy khuyến mãi) bằng mô hình Time Series đơn giản (ví dụ: trung bình trượt).
+Lift & Cannibalization Analysis: Tính toán Mức tăng thêm (Lift) thực sự của chiến dịch trừ đi doanh số sụt giảm trước và sau ngày sale. Từ đó tính ra ROI ròng của mã giảm giá.
+Web Analytics: Kiểm tra tỷ lệ Bounce Rate và Conversion Rate từ web_traffic trong ngày sale. Có phải lưu lượng truy cập tăng vọt nhưng tỷ lệ chuyển đổi thấp đi vì hết hàng (inventory) hay vì người dùng lấy mã xong không mua?
+Bài toán 3: Chẩn đoán Chân dung Khách hàng lạm dụng Hoàn trả (Serial Returners) và Đề xuất Tối ưu quá trình "Tồn kho ngược" (Reverse Logistics)
+Đối với mặt hàng thời trang, kích cỡ (size fitting), màu sắc lệch ảnh thực tế, và thói quen COD (Thanh toán khi nhận hàng) khiến tỷ lệ hoàn hàng tại Việt Nam rất cao (thường dao động 15-30%). Tiền xử lý hàng hoàn (chi phí vận chuyển 2 chiều, mất form dáng sản phẩm) là một gánh nặng khổng lồ.
+
+Ý nghĩa cốt lõi (Meaningful):
+Ngăn chặn rò rỉ lợi nhuận cực lớn.
+Khuyến nghị hành động (Prescriptive): Ra quyết định thiết lập các quy định chặn phương thức thanh toán COD đối với nhóm rủi ro cao, hoặc cải tiến bảng size/hình ảnh cho các sản phẩm bị trả lại nhiều.
+Điểm thách thức (Challenging):
+Băng qua nhiều khía cạnh nghiệp vụ: Phương thức thanh toán (payments), Thói quen Khách hàng (customers, returns), và Đặc tính sản phẩm (products, order_items).
+Các bước thực hiện:
+Data Prep: Tạo một bộ "Customer Profile" (Gom nhóm theo Product Category và Payment Method). Tính ra hai chỉ số định lượng: Return_Rate (Tỷ lệ trả / Tổng số đơn) và Cost_of_Returns (Chi phí tổn thất do trả).
+Diagnostic Analysis: Tìm ra các biến số dẫn dắt (Drivers of Returns). Ví dụ: Có phải đơn hàng thanh toán COD (payments) thường bị trả lại ở danh mục "Quần Jeans" (products) do không vừa size?
+Clustering / Segmentation: Phân cụm (K-Means hoặc quy tắc tĩnh) tệp Khách hàng để tìm ra "Serial Returners" (Những người mua 10 nhưng hoàn 8 - thường có thói quen mua nhiều size để thử rồi trả lại).
+Interpretation & Action: Trực quan hóa bản đồ nhiệt (Heatmap) tỷ lệ hoàn theo Hạng mục sản phẩm (Category x Size). Đề xuất xây dựng tính năng "Đề xuất size thông minh" trên web hoặc cắt mã COD đối với tệp Serial Returners.
+
+Bài toán 3: Chẩn đoán Chân dung Khách hàng lạm dụng Hoàn trả (Serial Returners) và Đề xuất Tối ưu quá trình "Tồn kho ngược" (Reverse Logistics)
+Đối với mặt hàng thời trang, kích cỡ (size fitting), màu sắc lệch ảnh thực tế, và thói quen COD (Thanh toán khi nhận hàng) khiến tỷ lệ hoàn hàng tại Việt Nam rất cao (thường dao động 15-30%). Tiền xử lý hàng hoàn (chi phí vận chuyển 2 chiều, mất form dáng sản phẩm) là một gánh nặng khổng lồ.
+
+Ý nghĩa cốt lõi (Meaningful):
+Ngăn chặn rò rỉ lợi nhuận cực lớn.
+Khuyến nghị hành động (Prescriptive): Ra quyết định thiết lập các quy định chặn phương thức thanh toán COD đối với nhóm rủi ro cao, hoặc cải tiến bảng size/hình ảnh cho các sản phẩm bị trả lại nhiều.
+Điểm thách thức (Challenging):
+Băng qua nhiều khía cạnh nghiệp vụ: Phương thức thanh toán (payments), Thói quen Khách hàng (customers, returns), và Đặc tính sản phẩm (products, order_items).
+Các bước thực hiện:
+Data Prep: Tạo một bộ "Customer Profile" (Gom nhóm theo Product Category và Payment Method). Tính ra hai chỉ số định lượng: Return_Rate (Tỷ lệ trả / Tổng số đơn) và Cost_of_Returns (Chi phí tổn thất do trả).
+Diagnostic Analysis: Tìm ra các biến số dẫn dắt (Drivers of Returns). Ví dụ: Có phải đơn hàng thanh toán COD (payments) thường bị trả lại ở danh mục "Quần Jeans" (products) do không vừa size?
+Clustering / Segmentation: Phân cụm (K-Means hoặc quy tắc tĩnh) tệp Khách hàng để tìm ra "Serial Returners" (Những người mua 10 nhưng hoàn 8 - thường có thói quen mua nhiều size để thử rồi trả lại).
+Interpretation & Action: Trực quan hóa bản đồ nhiệt (Heatmap) tỷ lệ hoàn theo Hạng mục sản phẩm (Category x Size). Đề xuất xây dựng tính năng "Đề xuất size thông minh" trên web hoặc cắt mã COD đối với tệp Serial Returners.
