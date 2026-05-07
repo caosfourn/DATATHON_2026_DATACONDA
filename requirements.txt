@@ -1,5 +1,5 @@
-pandas
-numpy
+pandas>=2.0.0
+numpy>=1.24.0
 duckdb
 jupyter
 matplotlib
@@ -9,3 +9,5 @@ xgboost
 lightgbm
 statsmodels
 shap
+streamlit>=1.30.0
+plotly>=5.18.0
